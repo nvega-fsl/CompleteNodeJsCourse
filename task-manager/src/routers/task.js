@@ -17,12 +17,33 @@ router.post('/tasks', auth, async (req, res) => {
     }
 })
 
+// GET /tasks?completed=true
+// GET /tasks?limit=10&skip=20
+// GET /tasks?sortBy=createdAt:desc
 router.get('/tasks', auth, async (req, res) => {
     try {
-        const tasks = await Task.find({ owner: req.user._id })
+        let sort = {}
+        if (req.query.sortBy){
+            const parts = req.query.sortBy.split(":")
+            sort[parts[0]] = parts[1] === "desc" ? -1 : 1
+        }
+        const match = req.query.completed ? { completed: eval(req.query.completed) } : {}
+        const tasks = await Task.find({ owner: req.user._id, ...match  }, null, {
+            limit: parseInt(req.query.limit),
+            skip: parseInt(req.query.skip),
+            sort
+        })
         res.send(tasks)
         //TODO:review populate
-        // await req.user.pupulate('tasks').execPopulate()
+        // await req.user.pupulate({
+        //     path: 'tasks',
+        //     match,
+        //     options: {
+        //         limit: parseInt(req.query.limit),
+        //         skip: parseInt(req.query.skip),
+        //         sort
+        //     }
+        // }).execPopulate()
         // res.send(req.user.tasks)
     } catch (e) {
         console.log(e)
@@ -71,5 +92,17 @@ router.delete('/tasks/:id', auth, async (req, res) => {
         res.status(500).send()        
     }
 })
+
+// const deleteAll = async () => {
+//     console.log('deleting all')
+//     const resp = await Task.deleteMany({})
+//     console.log(resp)
+//     const tasks = await Task.find({})
+//     console.log(tasks)
+// }
+
+// deleteAll()
+
+
 
 module.exports = router

@@ -75,4 +75,15 @@ router.delete('/users/me', auth, async (req, res) => {
     }
 })
 
+
+// const deleteAll = async () => {
+//     console.log('deleting all')
+//     const resp = await User.deleteMany({})
+//     console.log(resp)
+//     const users = await User.find({})
+//     console.log(users)
+// }
+
+// deleteAll()
+
 module.exports = router
